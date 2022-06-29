@@ -17,16 +17,38 @@ namespace solutions {
 
 class CyclicBarrier {
  public:
-  explicit CyclicBarrier(size_t /*participants*/) {
-    // Not implemented
+  explicit CyclicBarrier(size_t total) {
+      total_ = total;
   }
 
   // Blocks until all participants have invoked Arrive()
   void Arrive() {
-    // Not implemented
+      std::unique_lock<twist::stdlike::mutex> lock(mutex_);
+      new_come_.wait(lock, [&](){ return !all_come_predicate_; });
+
+      ++arrived_;
+      if (arrived_ == total_) {
+          all_come_predicate_ = true;
+          all_come_.notify_all();
+      }
+      else
+          all_come_.wait(lock, [&]() { return all_come_predicate_; });
+
+      --arrived_;
+      if (arrived_ == 0) {
+          all_come_predicate_ = false;
+          new_come_.notify_all();
+      }
   }
 
  private:
+  std::uint32_t arrived_{0};
+  bool all_come_predicate_{false};
+  std::uint32_t total_;
+  twist::stdlike::mutex mutex_;
+  twist::stdlike::condition_variable all_come_;
+  twist::stdlike::condition_variable new_come_;
+
 };
 
 }  // namespace solutions

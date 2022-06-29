@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <cassert>
+#include "shared_state.hpp"
 
 namespace stdlike {
 
@@ -11,7 +12,6 @@ class Future {
   friend class Promise;
 
  public:
-  // Non-copyable
   Future(const Future&) = delete;
   Future& operator=(const Future&) = delete;
 
@@ -19,10 +19,13 @@ class Future {
   Future(Future&&) = default;
   Future& operator=(Future&&) = default;
 
+  Future(std::shared_ptr<detail::SharedState<T>> state) : state_(std::move(state)) {
+  }
+
   // One-shot
   // Wait for result (value or exception)
   T Get() {
-    throw std::runtime_error("Not implemented");
+    return state_->get();
   }
 
  private:
@@ -30,7 +33,7 @@ class Future {
   }
 
  private:
-  // ???
+  std::shared_ptr<detail::SharedState<T>> state_;
 };
 
 }  // namespace stdlike

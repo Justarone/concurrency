@@ -17,23 +17,28 @@ namespace solutions {
 class Semaphore {
  public:
   // Creates a Semaphore with the given number of permits
-  explicit Semaphore(size_t /*initial*/) {
-    // Not implemented
+  explicit Semaphore(size_t initial) : permits_(initial) {
   }
 
   // Acquires a permit from this semaphore,
   // blocking until one is available
   void Acquire() {
-    // Not implemented
+      std::unique_lock<twist::stdlike::mutex> lock(mutex_);
+      has_elements_.wait(lock, [&](){ return permits_ > 0; });
+      --permits_;
   }
 
   // Releases a permit, returning it to the semaphore
   void Release() {
-    // Not implemented
+      std::unique_lock<twist::stdlike::mutex> lock(mutex_);
+      ++permits_;
+      has_elements_.notify_one();
   }
 
  private:
-  // Permits
+  std::uint32_t permits_;
+  twist::stdlike::mutex mutex_;
+  twist::stdlike::condition_variable has_elements_;
 };
 
 }  // namespace solutions
