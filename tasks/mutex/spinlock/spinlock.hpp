@@ -17,7 +17,7 @@ class TASSpinLock {
   }
 
   bool TryLock() {
-    return false;  // Not implemented
+    return locked_.Exchange(1) == 0;
   }
 
   void Unlock() {

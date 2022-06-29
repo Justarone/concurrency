@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <twist/stdlike/mutex.hpp>
 
 namespace util {
@@ -13,17 +14,21 @@ class Mutexed {
   using MutexImpl = twist::stdlike::mutex;
 
   class UniqueRef {
-    // Your code goes here
-
     // Non-copyable
     UniqueRef(const UniqueRef&) = delete;
 
     // Non-movable
     UniqueRef(UniqueRef&&) = delete;
 
-    // operator*
+  private:
+    T& data_;
+    std::unique_lock<MutexImpl> guard_;
 
-    // operator->
+  public:
+    UniqueRef(T& data, std::unique_lock<MutexImpl>&& guard) : data_(data), guard_(std::move(guard))
+    {}
+    T& operator*() { return data_; }
+    T* operator->() { return &data_; }
   };
 
  public:
@@ -33,7 +38,8 @@ class Mutexed {
   }
 
   UniqueRef Lock() {
-    return {};
+    std::unique_lock guard(mutex_);
+    return UniqueRef(object_, std::move(guard));
   }
 
  private:

@@ -23,8 +23,8 @@ TEST_SUITE(Deadlock) {
       Mutex mutex;
 
       auto locker = [&]() {
-        // Your code goes here
-        // use mutex.Lock() / mutex.Unlock() to lock/unlock mutex
+        mutex.Lock();
+        mutex.Lock();
       };
 
       SetDeadlockHandler([]() {
@@ -51,12 +51,19 @@ TEST_SUITE(Deadlock) {
       // Fiber routines
 
       auto first = [&]() {
-        // Your code goes here
-        // Use Yield() to reschedule current fiber
+        a.Lock();
+        Yield();
+        b.Lock();
+        a.Unlock();
+        b.Unlock();
       };
 
       auto second = [&]() {
-        // Your code goes here
+        b.Lock();
+        Yield();
+        a.Lock();
+        a.Unlock();
+        b.Unlock();
       };
 
       // No deadlock with one fiber
