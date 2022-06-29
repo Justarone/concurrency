@@ -19,6 +19,6 @@ FUNCTION_NAME(AtomicStore):
     retq
 
 FUNCTION_NAME(AtomicExchange):
-    movq (%rdi), %rax  # Load
-    movq %rsi, (%rdi)  # Store
+    movq %rsi, %rax   # Load
+    xchg %rax, (%rdi) # Store
     retq

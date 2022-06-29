@@ -29,6 +29,7 @@ TEST_SUITE(TrickyLock) {
         for (size_t i = 0; i < kIterations; ++i) {
           // TrickyLock::Lock
           while (thread_count++ > 0) {
+            Yield();
             --thread_count;
           }
           // Spinlock acquired
@@ -41,6 +42,7 @@ TEST_SUITE(TrickyLock) {
           }
 
           // TrickyLock::Unlock
+          Yield();
           --thread_count;
           // Spinlock released
         }
