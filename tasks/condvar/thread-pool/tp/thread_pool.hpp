@@ -4,6 +4,7 @@
 #include <tp/task.hpp>
 
 #include <twist/stdlike/thread.hpp>
+#include <vector>
 
 namespace tp {
 
@@ -32,7 +33,15 @@ class ThreadPool {
   static ThreadPool* Current();
 
  private:
-  // Worker threads, task queue, etc
+  UnboundedBlockingQueue<Task> queue_;
+  std::vector<twist::stdlike::thread> threads_;
+
+  twist::stdlike::mutex mutex_;
+  std::atomic<std::uint32_t> to_be_processed_{0};
+  std::uint32_t processed_{0};
+  twist::stdlike::condition_variable wg_done_;
+
+  void Worker();
 };
 
 inline ThreadPool* Current() {
